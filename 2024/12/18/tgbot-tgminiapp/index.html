@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"su-u-un.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":true,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-P6R7XBLZGY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-P6R7XBLZGY');
+</script>
+  <meta name="description" content="前言tg应用开发分为机器人和小程序两部分 tg-bot首先要在telegram的BotFather申请创建机器人，直接输入&#x2F;newbot按照命令一步一步来就可以了。 成功后你会获得一串HTTP API，这个要保存下来。后续编程开发需要使用。 tgbot程序编写 bot部分参考了这位的博客  技术栈：grammY+node直接启动。以下是具体代码。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于tg机器人和tg小程序">
+<meta property="og:url" content="https://su-u-un.github.io/2024/12/18/tgbot-tgminiapp/index.html">
+<meta property="og:site_name" content="苏某的博客">
+<meta property="og:description" content="前言tg应用开发分为机器人和小程序两部分 tg-bot首先要在telegram的BotFather申请创建机器人，直接输入&#x2F;newbot按照命令一步一步来就可以了。 成功后你会获得一串HTTP API，这个要保存下来。后续编程开发需要使用。 tgbot程序编写 bot部分参考了这位的博客  技术栈：grammY+node直接启动。以下是具体代码。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-12-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-12-31T03:54:10.000Z">
+<meta property="article:author" content="Johnny Su">
+<meta property="article:tag" content="telegram">
+<meta property="article:tag" content="tgminiapp">
+<meta property="article:tag" content="tgbot">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://su-u-un.github.io/2024/12/18/tgbot-tgminiapp/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>关于tg机器人和tg小程序 | 苏某的博客</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P6R7XBLZGY"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-P6R7XBLZGY');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">苏某的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://su-u-un.github.io/2024/12/18/tgbot-tgminiapp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Johnny Su">
+      <meta itemprop="description" content="这里是苏某">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="苏某的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          关于tg机器人和tg小程序
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-12-19 00:00:00" itemprop="dateCreated datePublished" datetime="2024-12-19T00:00:00+08:00">2024-12-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">技术分享</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2024/12/18/tgbot-tgminiapp/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2024/12/18/tgbot-tgminiapp/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>677</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>tg应用开发分为机器人和小程序两部分</p>
+<h3 id="tg-bot"><a href="#tg-bot" class="headerlink" title="tg-bot"></a>tg-bot</h3><p>首先要在telegram的<code>BotFather</code>申请创建机器人，直接输入<code>/newbot</code>按照命令一步一步来就可以了。</p>
+<p>成功后你会获得一串HTTP API，这个要保存下来。后续编程开发需要使用。</p>
+<h3 id="tgbot程序编写"><a href="#tgbot程序编写" class="headerlink" title="tgbot程序编写"></a>tgbot程序编写</h3><blockquote>
+<p>bot部分参考了<a href="%22https://lengmo714.top/78a7bf41.html%22">这位的博客</a></p>
+</blockquote>
+<p>技术栈：grammY+node直接启动。以下是具体代码。</p>
+<span id="more"></span>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">const &#123; Bot, InlineKeyboard &#125; = require(&#x27;grammy&#x27;)</span><br><span class="line"></span><br><span class="line">const TOKEN = &#x27;&#x27;;  // bot机器人的token</span><br><span class="line"></span><br><span class="line">const bot = new Bot(TOKEN);</span><br><span class="line"></span><br><span class="line">const app_url=&#x27;&#x27; // tg小程序在tg内的url</span><br><span class="line"></span><br><span class="line">// 内联键盘，包含游戏按钮和访问网站按钮</span><br><span class="line">const keyboard = new InlineKeyboard()</span><br><span class="line">  .url(&quot;开始游戏&quot;,app_url).row()</span><br><span class="line"></span><br><span class="line">// 设置左侧目录按钮打开网页，这个功能就是让对话框左侧的菜单按钮变成打开网页的按钮</span><br><span class="line">bot.api.setChatMenuButton(&#123;</span><br><span class="line">  menu_button: &#123;</span><br><span class="line">    type: &quot;web_app&quot;,</span><br><span class="line">    text: &quot;Play&quot;,</span><br><span class="line">    web_app: &#123;</span><br><span class="line">      url: &quot;&quot; // 前端域名</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">// 设置小程序快捷命令</span><br><span class="line">bot.api.setMyCommands([</span><br><span class="line">  &#123; command: &quot;start&quot;, description: &quot;Start the bot&quot; &#125;,</span><br><span class="line">  &#123; command: &quot;info&quot;, description: &quot;Get user info&quot; &#125;,</span><br><span class="line">]);</span><br><span class="line"></span><br><span class="line">// 处理/start命令</span><br><span class="line">bot.command(&quot;start&quot;, async (ctx) =&gt; &#123;</span><br><span class="line">  const gifUrl = &quot;https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif&quot;;</span><br><span class="line">  const caption = `Hi $&#123;ctx.update.message.from.first_name&#125;!\n\n这有一款很好玩的小游戏`;</span><br><span class="line"></span><br><span class="line">  await ctx.replyWithAnimation(gifUrl, &#123;</span><br><span class="line">    caption: caption,</span><br><span class="line">    reply_markup: keyboard,</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 处理 /info 命令</span><br><span class="line">bot.command(&quot;info&quot;, async (ctx) =&gt; &#123;</span><br><span class="line">  const firstName = ctx.update.message.from.first_name;</span><br><span class="line">  const userId = ctx.from.id;</span><br><span class="line"></span><br><span class="line">  // 初始化头像URL为空字符串</span><br><span class="line">  let photoUrl = &#x27;&#x27;;</span><br><span class="line"></span><br><span class="line">  try &#123;</span><br><span class="line">    // 获取用户头像信息</span><br><span class="line">    const profilePhotos = await bot.api.getUserProfilePhotos(userId, &#123; limit: 1 &#125;);</span><br><span class="line"></span><br><span class="line">    if (profilePhotos.total_count &gt; 0) &#123;</span><br><span class="line">      const fileId = profilePhotos.photos[0][0].file_id;</span><br><span class="line">      const file = await bot.api.getFile(fileId);</span><br><span class="line">      photoUrl = `https://api.telegram.org/file/bot$&#123;TOKEN&#125;/$&#123;file.file_path&#125;`;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; catch (error) &#123;</span><br><span class="line">    console.error(&quot;获取头像失败: &quot;, error);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // 获取用户登录信息</span><br><span class="line">  let userInfo = &#x27;&#x27;;</span><br><span class="line">  let id = &quot;&quot;;</span><br><span class="line">  let name = &quot;&quot;;</span><br><span class="line">  try &#123;</span><br><span class="line">    const chatMember = await bot.api.getChatMember(ctx.chat.id, userId);</span><br><span class="line">    id = chatMember.user.id;</span><br><span class="line">    name = chatMember.user.first_name;</span><br><span class="line">    userInfo = `用户信息:\nID: $&#123;chatMember.user.id&#125;\n名字: $&#123;chatMember.user.first_name&#125;\n用户名: $&#123;chatMember.user.username&#125;\n状态: $&#123;chatMember.status&#125;`;</span><br><span class="line">  &#125; catch (error) &#123;</span><br><span class="line">    console.error(&quot;获取用户信息失败: &quot;, error);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  if (photoUrl) &#123;</span><br><span class="line">    await ctx.reply(`头像链接: $&#123;photoUrl&#125;`);</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    await ctx.reply(&quot;未能获取你的头像。&quot;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  await ctx.reply(userInfo || &quot;未能获取你的用户信息。&quot;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 启动机器人</span><br><span class="line">bot.start();</span><br></pre></td></tr></table></figure>
+<p>这里面注意的就是api这个类，可以参照着tg的官方文档，找到自己需要的method名，通过method名找到grammY库的案例（或者直接在搜索引擎搜索这个method，也可以找到参数）</p>
+<h2 id="tg小程序"><a href="#tg小程序" class="headerlink" title="tg小程序"></a>tg小程序</h2><p>tg小程序就是在tg内置的浏览器打开你指定链接的网站。</p>
+<h3 id="获取tg信息"><a href="#获取tg信息" class="headerlink" title="获取tg信息"></a>获取tg信息</h3><p>然后我们在网站内一般会有获取tg用户信息之类的操作，直接引入<code>&lt;script src=&quot;https://telegram.org/js/telegram-web-app.js&quot;&gt;&lt;/script&gt;</code>这个脚本</p>
+<p>然后在前端项目中，通过<code>window.Telegram.WebApp.xxx</code>去调用需要的方法。具体可以参考<span class="exturl" data-url="aHR0cHM6Ly93d3cuamFja3lndS5tZS9wb3N0cy9hLXRlbGVncmFtLW1pbmktYXBwLw==">这篇博客<i class="fa fa-external-link-alt"></i></span>，他对tg小程序的文档作了翻译。</p>
+<h3 id="小程序ui"><a href="#小程序ui" class="headerlink" title="小程序ui"></a>小程序ui</h3><p>这里采用<code>@telegram-apps/sdk</code>这个包，可以自行去检索一下，他还有很多相关的包例如对react和vue的适配的包。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/telegram/" rel="tag"><i class="fa fa-tag"></i> telegram</a>
+              <a href="/tags/tgminiapp/" rel="tag"><i class="fa fa-tag"></i> tgminiapp</a>
+              <a href="/tags/tgbot/" rel="tag"><i class="fa fa-tag"></i> tgbot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/12/16/vue3-nest/2/" rel="prev" title="nestjs+vue3前后端项目并配置ssl(nest打包与nginx篇)">
+      <i class="fa fa-chevron-left"></i> nestjs+vue3前后端项目并配置ssl(nest打包与nginx篇)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/12/30/tg-ios/" rel="next" title="ios上telegram miniapp中声音播放延迟">
+      ios上telegram miniapp中声音播放延迟 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tg-bot"><span class="nav-number">1.1.</span> <span class="nav-text">tg-bot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tgbot%E7%A8%8B%E5%BA%8F%E7%BC%96%E5%86%99"><span class="nav-number">1.2.</span> <span class="nav-text">tgbot程序编写</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tg%E5%B0%8F%E7%A8%8B%E5%BA%8F"><span class="nav-number">2.</span> <span class="nav-text">tg小程序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96tg%E4%BF%A1%E6%81%AF"><span class="nav-number">2.1.</span> <span class="nav-text">获取tg信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%A8%8B%E5%BA%8Fui"><span class="nav-number">2.2.</span> <span class="nav-text">小程序ui</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Johnny Su</p>
+  <div class="site-description" itemprop="description">这里是苏某</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1N1LXUtdW4=" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Su-u-un"><i class="fab fa-github fa-fw"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnRsMDcxNTE1QGdtYWlsLmNvbQ==" title="E-Mail → mailto:tl071515@gmail.com"><i class="fa fa-envelope fa-fw"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Johnny Su</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">15k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">55 分钟</span>
+</div>
+  <div class="powered-by">由 <span class="exturl theme-link" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl theme-link" data-url="aHR0cHM6Ly90aGVtZS1uZXh0Lm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://https-su-u-un-github-io.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://su-u-un.github.io/2024/12/18/tgbot-tgminiapp/";
+    this.page.identifier = "2024/12/18/tgbot-tgminiapp/";
+    this.page.title = "关于tg机器人和tg小程序";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://https-su-u-un-github-io.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

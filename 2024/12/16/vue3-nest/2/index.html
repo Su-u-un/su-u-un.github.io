@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"su-u-un.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":true,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-P6R7XBLZGY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-P6R7XBLZGY');
+</script>
+  <meta name="description" content="本文使用的技术栈: Vue3+Vite+Axios+Pinia、Nestjs+Typeorm+mysql2 本篇记录nestjs打包和nginx操作">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nestjs+vue3前后端项目并配置ssl(nest打包与nginx篇)">
+<meta property="og:url" content="https://su-u-un.github.io/2024/12/16/vue3-nest/2/index.html">
+<meta property="og:site_name" content="苏某的博客">
+<meta property="og:description" content="本文使用的技术栈: Vue3+Vite+Axios+Pinia、Nestjs+Typeorm+mysql2 本篇记录nestjs打包和nginx操作">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://su-u-un.github.io/images/nest/2.png">
+<meta property="article:published_time" content="2024-12-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-12-31T03:54:10.000Z">
+<meta property="article:author" content="Johnny Su">
+<meta property="article:tag" content="服务器">
+<meta property="article:tag" content="nginx">
+<meta property="article:tag" content="Nestjs">
+<meta property="article:tag" content="https">
+<meta property="article:tag" content="ssl">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://su-u-un.github.io/images/nest/2.png">
+
+<link rel="canonical" href="https://su-u-un.github.io/2024/12/16/vue3-nest/2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>nestjs+vue3前后端项目并配置ssl(nest打包与nginx篇) | 苏某的博客</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P6R7XBLZGY"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-P6R7XBLZGY');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">苏某的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://su-u-un.github.io/2024/12/16/vue3-nest/2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Johnny Su">
+      <meta itemprop="description" content="这里是苏某">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="苏某的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          nestjs+vue3前后端项目并配置ssl(nest打包与nginx篇)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-12-17 00:00:00" itemprop="dateCreated datePublished" datetime="2024-12-17T00:00:00+08:00">2024-12-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">技术分享</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2024/12/16/vue3-nest/2/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2024/12/16/vue3-nest/2/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>646</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文使用的技术栈: Vue3+Vite+Axios+Pinia、Nestjs+Typeorm+mysql2</p>
+<p>本篇记录nestjs打包和nginx操作</p>
+<span id="more"></span>
+
+<h2 id="nest"><a href="#nest" class="headerlink" title="nest"></a>nest</h2><h3 id="nest打包依赖问题"><a href="#nest打包依赖问题" class="headerlink" title="nest打包依赖问题"></a>nest打包依赖问题</h3><p>正常情况下，前端打包后的&#x2F;dist文件夹是可以直接通过node启动的，但是nestjs不会把依赖打包。</p>
+<p>所以nest项目最好是git pull拉取项目，然后在服务器安装依赖并打包。</p>
+<h3 id="nest打包环境变量问题"><a href="#nest打包环境变量问题" class="headerlink" title="nest打包环境变量问题"></a>nest打包环境变量问题</h3><p>如果在nest中通过了ConfigModule使用.env，需要把.env放到打包后的&#x2F;dist中，否则无法找到环境变量</p>
+<h3 id="pm2启动nest静态文件问题"><a href="#pm2启动nest静态文件问题" class="headerlink" title="pm2启动nest静态文件问题"></a>pm2启动nest静态文件问题</h3><p>目录简略结构如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">my-project/</span><br><span class="line">├── dist/</span><br><span class="line">│   ├── users/              # 项目的表</span><br><span class="line">│   ├── ...                 # 其余文件</span><br><span class="line">│   └── main.js             # 项目的启动文件</span><br><span class="line">├── node_module/</span><br><span class="line">│   ├── ...                 # 依赖包</span><br><span class="line">|   └── ...                 # 依赖包</span><br><span class="line">├── src/</span><br><span class="line">│   ├── users/              # 项目的表</span><br><span class="line">│   ├── utils/              # 工具</span><br><span class="line">│   ├── app.module.ts       # app模块</span><br><span class="line">│   └── main.ts             # 入口文件</span><br><span class="line">├── .env                    # 环境变量</span><br><span class="line">├── ...                     # 其他文件</span><br><span class="line">├── .gitignore              # Git 忽略文件</span><br><span class="line">├── package.json            # 项目配置文件</span><br><span class="line">└── README.md               # 项目说明文件</span><br></pre></td></tr></table></figure>
+<p>我在my-project&#x2F;src下运行<code>sudo pm2 start ../dist/main.js</code>命令，发现有报错。</p>
+<p>打印出来发现，报错居然出现在main.ts。</p>
+<p>尝试重启、删除再启动都无效。</p>
+<p>后面进入&#x2F;dist使用<code>sudo pm2 start ./main.js</code>才成功启动了main.js</p>
+<h2 id="ssl"><a href="#ssl" class="headerlink" title="ssl"></a>ssl</h2><h3 id="前端ssl"><a href="#前端ssl" class="headerlink" title="前端ssl"></a>前端ssl</h3><blockquote>
+<p>ps:不建议用node启动express重定向<code>/</code>到<code>/index.html</code>，这样会导致网页刷新后404</p>
+</blockquote>
+<p>服务器配置nginx后，在nginx.conf内进行如下配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">  server &#123;</span><br><span class="line">      listen 443 ssl;</span><br><span class="line"></span><br><span class="line">      server_name 你的域名;</span><br><span class="line"></span><br><span class="line">      ssl_certificate 你的证书;</span><br><span class="line">      ssl_certificate_key 你的密钥;</span><br><span class="line"></span><br><span class="line">      ssl_session_cache shared:SSL:1m;</span><br><span class="line">      ssl_session_timeout  5m;</span><br><span class="line"></span><br><span class="line">      ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;</span><br><span class="line">      ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;</span><br><span class="line"></span><br><span class="line">      ssl_prefer_server_ciphers on;</span><br><span class="line"></span><br><span class="line">      location / &#123;</span><br><span class="line">          root 你的html文件所在的目录;</span><br><span class="line">          index index.html index.htm;</span><br><span class="line">          try_files $uri $uri/ /index.html;</span><br><span class="line">      &#125;</span><br><span class="line">      location /api/ &#123;</span><br><span class="line">          proxy_pass 转发后端接口;</span><br><span class="line">          proxy_set_header Host $host;</span><br><span class="line">          proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">          proxy_set_header X-Forwarded-Proto $scheme;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ssl_certificate用cer或者crt文件都可以</p>
+<p>ssl_certificate_key就是key文件</p>
+<h3 id="后端ssl问题"><a href="#后端ssl问题" class="headerlink" title="后端ssl问题"></a>后端ssl问题</h3><p>当前端配置了ssl后，https向http的后端发起请求会出错。如下图<img src="/../images/nest/2.png"></p>
+<p>现在就有两种解决办法，我个人总感觉第二种不太好，但是没做过后端，不清楚第二种合不合适。</p>
+<h4 id="一、nginx转发"><a href="#一、nginx转发" class="headerlink" title="一、nginx转发"></a>一、nginx转发</h4><p>我的后端在服务器的3000端口挂着，所以我在nginx里面，对本机的3000端口进行转发，路径设置的<code>/api/</code>，也就是上面nginx配置中的<code>location /api/</code></p>
+<h4 id="二、把ssl也给nest装上"><a href="#二、把ssl也给nest装上" class="headerlink" title="二、把ssl也给nest装上"></a>二、把ssl也给nest装上</h4><ol>
+<li>进入nest的main.ts</li>
+<li>定义一个对象，并导入key和cert</li>
+<li>将对象放进nest的工厂函数，全部代码如下<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># main.ts</span><br><span class="line"></span><br><span class="line">const httpsOptions = &#123;</span><br><span class="line">  key: fs.readFileSync(&#x27;密钥&#x27;),</span><br><span class="line">  cert: fs.readFileSync(&#x27;证书&#x27;),</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">async function bootstrap() &#123;</span><br><span class="line">  const app = await NestFactory.create(AppModule, httpsOptions);</span><br><span class="line">  app.enableCors();</span><br><span class="line">  await app.listen(process.env.PORT ?? 3000);</span><br><span class="line">&#125;</span><br><span class="line">bootstrap();</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="三、再买个ssl"><a href="#三、再买个ssl" class="headerlink" title="三、再买个ssl"></a>三、再买个ssl</h4>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E6%9C%8D%E5%8A%A1%E5%99%A8/" rel="tag"><i class="fa fa-tag"></i> 服务器</a>
+              <a href="/tags/nginx/" rel="tag"><i class="fa fa-tag"></i> nginx</a>
+              <a href="/tags/Nestjs/" rel="tag"><i class="fa fa-tag"></i> Nestjs</a>
+              <a href="/tags/https/" rel="tag"><i class="fa fa-tag"></i> https</a>
+              <a href="/tags/ssl/" rel="tag"><i class="fa fa-tag"></i> ssl</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/12/15/vue3-nest/1/" rel="prev" title="nestjs+vue3前后端项目并配置ssl(nest与mysql篇)">
+      <i class="fa fa-chevron-left"></i> nestjs+vue3前后端项目并配置ssl(nest与mysql篇)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/12/18/tgbot-tgminiapp/" rel="next" title="关于tg机器人和tg小程序">
+      关于tg机器人和tg小程序 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#nest"><span class="nav-number">1.</span> <span class="nav-text">nest</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#nest%E6%89%93%E5%8C%85%E4%BE%9D%E8%B5%96%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">nest打包依赖问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nest%E6%89%93%E5%8C%85%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E9%97%AE%E9%A2%98"><span class="nav-number">1.2.</span> <span class="nav-text">nest打包环境变量问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pm2%E5%90%AF%E5%8A%A8nest%E9%9D%99%E6%80%81%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98"><span class="nav-number">1.3.</span> <span class="nav-text">pm2启动nest静态文件问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ssl"><span class="nav-number">2.</span> <span class="nav-text">ssl</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%AB%AFssl"><span class="nav-number">2.1.</span> <span class="nav-text">前端ssl</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8E%E7%AB%AFssl%E9%97%AE%E9%A2%98"><span class="nav-number">2.2.</span> <span class="nav-text">后端ssl问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81nginx%E8%BD%AC%E5%8F%91"><span class="nav-number">2.2.1.</span> <span class="nav-text">一、nginx转发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%8A%8Assl%E4%B9%9F%E7%BB%99nest%E8%A3%85%E4%B8%8A"><span class="nav-number">2.2.2.</span> <span class="nav-text">二、把ssl也给nest装上</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%86%8D%E4%B9%B0%E4%B8%AAssl"><span class="nav-number">2.2.3.</span> <span class="nav-text">三、再买个ssl</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Johnny Su</p>
+  <div class="site-description" itemprop="description">这里是苏某</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1N1LXUtdW4=" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Su-u-un"><i class="fab fa-github fa-fw"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnRsMDcxNTE1QGdtYWlsLmNvbQ==" title="E-Mail → mailto:tl071515@gmail.com"><i class="fa fa-envelope fa-fw"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Johnny Su</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">15k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">55 分钟</span>
+</div>
+  <div class="powered-by">由 <span class="exturl theme-link" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl theme-link" data-url="aHR0cHM6Ly90aGVtZS1uZXh0Lm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://https-su-u-un-github-io.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://su-u-un.github.io/2024/12/16/vue3-nest/2/";
+    this.page.identifier = "2024/12/16/vue3-nest/2/";
+    this.page.title = "nestjs+vue3前后端项目并配置ssl(nest打包与nginx篇)";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://https-su-u-un-github-io.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
